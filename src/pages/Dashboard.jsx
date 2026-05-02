@@ -200,7 +200,7 @@ export default function Dashboard({ userData }) {
             {now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
           </p>
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mt-0.5 truncate">
-            Bonjour, {userData?.nom} 👋
+            Bonjour, {userData?.nom} 
           </h1>
           <p className="text-sm text-gray-500 mt-0.5">
             CTA de Broukou · Région de la Kara ·{' '}
