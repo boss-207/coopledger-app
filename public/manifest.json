@@ -1,0 +1,23 @@
+
+
+{
+  "name": "CoopLedger",
+  "short_name": "CoopLedger",
+  "description": "Transparence blockchain pour les coopératives togolaises",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#14532d",
+  "theme_color": "#15803d",
+  "icons": [
+    {
+      "src": "logo192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "logo512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
