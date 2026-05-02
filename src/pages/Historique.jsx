@@ -18,17 +18,6 @@ function genHash() {
   ).join('');
 }
 
-/*const DEMO_TRANSACTIONS = [
-  { id: '1', titre: 'Vente surplus de grains', montant: 1250000, type: 'revenu', statut: 'valide', date: new Date('2026-04-16'), hash: '0x4f2a...8e11', initiateur: 'Aminata S.' },
-  { id: '2', titre: "Maintenance Pompe d'Irrigation #14", montant: 185000, type: 'depense', statut: 'valide', date: new Date('2026-04-17'), hash: '0x8b3c...2d45', initiateur: 'Moussa K.' },
-  { id: '3', titre: 'Subvention Agriculture Durable UE', montant: 4500000, type: 'revenu', statut: 'valide', date: new Date('2026-04-18'), hash: '0x1c4d...9f12', initiateur: 'Auto Système' },
-  { id: '4', titre: "Fourniture d'Engrais Organiques", montant: 890000, type: 'depense', statut: 'en_cours', date: new Date('2026-04-19'), hash: '0x7e5f...3a78', initiateur: 'Oumar D.' },
-  { id: '5', titre: "Fonds de Secours d'Urgence", montant: 250000, type: 'depense', statut: 'valide', date: new Date('2026-04-20'), hash: '0x2a6b...5c34', initiateur: 'Fatima B.' },
-  { id: '6', titre: 'Cotisation mensuelle — 45 membres', montant: 675000, type: 'revenu', statut: 'valide', date: new Date('2026-04-01'), hash: '0x9d7c...8e21', initiateur: 'Auto Système' },
-  { id: '7', titre: 'Achat semences maïs', montant: 320000, type: 'depense', statut: 'valide', date: new Date('2026-03-28'), hash: '0x3b8e...7f56', initiateur: 'Kofi A.' },
-  { id: '8', titre: 'Prime vente cacao Q1', montant: 2100000, type: 'revenu', statut: 'valide', date: new Date('2026-03-15'), hash: '0x6c9f...4d23', initiateur: 'Auto Système' },
-];*/
-
 const STATUT_CONFIG = {
   valide: { label: 'Vérifié', bg: 'bg-green-100 text-green-700', dot: 'bg-green-500' },
   en_cours: { label: 'En cours', bg: 'bg-yellow-100 text-yellow-700', dot: 'bg-yellow-500' },
@@ -42,6 +31,7 @@ const TYPE_CONFIG = {
   sortie: { label: 'Dépense', icon: '↓', bg: 'bg-red-100', color: 'text-red-500', sign: '-' },
 };
 
+// ── Vue tableau Desktop ──
 function TransactionRow({ tx, index }) {
   const [expanded, setExpanded] = useState(false);
   const statut = STATUT_CONFIG[tx.statut] || STATUT_CONFIG.valide;
@@ -110,6 +100,68 @@ function TransactionRow({ tx, index }) {
   );
 }
 
+// ── Vue carte Mobile ──
+function TransactionCard({ tx }) {
+  const [expanded, setExpanded] = useState(false);
+  const statut = STATUT_CONFIG[tx.statut] || STATUT_CONFIG.valide;
+  const type = TYPE_CONFIG[tx.type] || TYPE_CONFIG.depense;
+
+  return (
+    <div
+      className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
+      onClick={() => setExpanded(!expanded)}
+    >
+      <div className="flex items-center gap-3 p-4">
+        {/* Icône type */}
+        <div className={`w-10 h-10 ${type.bg} rounded-xl flex items-center justify-center text-base font-bold ${type.color} flex-shrink-0`}>
+          {type.icon}
+        </div>
+        {/* Info principale */}
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-gray-900 truncate">{tx.titre}</p>
+          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+            <p className="text-xs text-gray-400">{formatDate(tx.date)}</p>
+            {tx.initiateur && <p className="text-xs text-gray-400">· {tx.initiateur}</p>}
+          </div>
+          <p className="text-xs font-mono text-green-600 mt-0.5 truncate">{tx.hash || genHash()}</p>
+        </div>
+        {/* Montant + statut */}
+        <div className="text-right flex-shrink-0">
+          <p className={`text-base font-bold ${type.color}`}>
+            {type.sign}{(tx.montant || 0).toLocaleString('fr-FR')}
+          </p>
+          <p className="text-xs text-gray-400 mt-0.5">FCFA</p>
+          <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full mt-1 ${statut.bg}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${statut.dot}`} />
+            {statut.label}
+          </span>
+        </div>
+      </div>
+      {/* Détails expandables */}
+      {expanded && (
+        <div className="bg-green-50 border-t border-green-100 px-4 py-3 grid grid-cols-2 gap-3 text-xs">
+          <div>
+            <p className="text-gray-400 uppercase tracking-wide mb-1">Hash</p>
+            <p className="font-mono text-green-700 break-all">{tx.hash || genHash()}</p>
+          </div>
+          <div>
+            <p className="text-gray-400 uppercase tracking-wide mb-1">Réseau</p>
+            <p className="font-semibold text-gray-700">Polygon</p>
+          </div>
+          <div>
+            <p className="text-gray-400 uppercase tracking-wide mb-1">Confirmation</p>
+            <p className="font-semibold text-green-600">✓ 4 nœuds</p>
+          </div>
+          <div>
+            <p className="text-gray-400 uppercase tracking-wide mb-1">Montant</p>
+            <p className="font-bold text-gray-900">{formatFCFA(tx.montant)}</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Historique({ userData }) {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -146,59 +198,58 @@ export default function Historique({ userData }) {
   const totalPages = Math.ceil(filtrees.length / PAR_PAGE);
   const affichees = filtrees.slice((page - 1) * PAR_PAGE, page * PAR_PAGE);
 
-const soldeTotal = transactions
-  .filter(t => t.statut === 'valide')
-  .reduce((acc, tx) => {
-    const isEntree = tx.type === 'revenu' || tx.type === 'entree';
-    return isEntree ? acc + (tx.montant || 0) : acc - (tx.montant || 0);
-  }, 0);
+  const soldeTotal = transactions
+    .filter(t => t.statut === 'valide')
+    .reduce((acc, tx) => {
+      const isEntree = tx.type === 'revenu' || tx.type === 'entree';
+      return isEntree ? acc + (tx.montant || 0) : acc - (tx.montant || 0);
+    }, 0);
 
-const revenuMensuel = transactions
-  .filter(t => (t.type === 'revenu' || t.type === 'entree') && t.statut === 'valide')
-  .reduce((acc, tx) => acc + (tx.montant || 0), 0);
+  const revenuMensuel = transactions
+    .filter(t => (t.type === 'revenu' || t.type === 'entree') && t.statut === 'valide')
+    .reduce((acc, tx) => acc + (tx.montant || 0), 0);
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
       <div className="text-center">
-        <div className="text-5xl mb-3 animate-pulse"></div>
+        <div className="text-5xl mb-3 animate-pulse">🌿</div>
         <p className="text-green-700 font-semibold">Chargement du registre...</p>
       </div>
     </div>
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+    <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6">
 
       {/* HEADER */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div>
           <p className="text-xs text-gray-400 uppercase tracking-wider mb-1">Transparence Financière</p>
-          <h1 className="text-2xl font-bold text-gray-900">Le Registre Vivant 📋</h1>
-          <p className="text-gray-500 text-sm mt-1">
-            Registre immuable de chaque FCFA transitant par le fonds agricole. Basé sur la transparence, vérifié par la communauté.
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Le Registre Vivant 📋</h1>
+          <p className="text-gray-500 text-xs sm:text-sm mt-1 leading-relaxed">
+            Registre immuable de chaque FCFA transitant par le fonds agricole.
           </p>
         </div>
-        <div className="flex gap-3">
-          <button className="flex items-center gap-2 border border-gray-200 hover:bg-gray-50 text-gray-600 px-4 py-2 rounded-xl text-sm font-medium transition">
-            Audit PDF
+        <div className="flex gap-2 flex-wrap">
+          <button className="flex items-center gap-2 border border-gray-200 hover:bg-gray-50 text-gray-600 px-3 sm:px-4 py-2 rounded-xl text-sm font-medium transition whitespace-nowrap">
+            📄 Audit PDF
           </button>
-          <button className="flex items-center gap-2 border border-gray-200 hover:bg-gray-50 text-gray-600 px-4 py-2 rounded-xl text-sm font-medium transition">
-            Exporter CSV
+          <button className="flex items-center gap-2 border border-gray-200 hover:bg-gray-50 text-gray-600 px-3 sm:px-4 py-2 rounded-xl text-sm font-medium transition whitespace-nowrap">
+            📤 CSV
           </button>
         </div>
       </div>
 
       {/* STATS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100">
           <p className="text-sm text-gray-500 mb-1">Solde Total</p>
-          <p className="text-3xl font-black text-gray-900">{(soldeTotal / 1000000).toFixed(2)}M</p>
+          <p className="text-2xl sm:text-3xl font-black text-gray-900">{(soldeTotal / 1000000).toFixed(2)}M</p>
           <p className="text-xs text-gray-400 mt-1">FCFA</p>
         </div>
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-          <p className="text-sm text-gray-500 mb-1">Revenu Mensuel</p>
-{/* ✅ Affiche 0 si vide — pas de valeur fictive */}
-          <p className="text-3xl font-black text-blue-600">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100">
+          <p className="text-sm text-gray-500 mb-1">Revenu Total</p>
+          <p className="text-2xl sm:text-3xl font-black text-blue-600">
             {revenuMensuel >= 1000000
               ? `${(revenuMensuel / 1000000).toFixed(2)}M`
               : revenuMensuel >= 1000
@@ -207,29 +258,30 @@ const revenuMensuel = transactions
           </p>
           <p className="text-xs text-gray-400 mt-1">FCFA</p>
         </div>
-        <div className="bg-green-900 rounded-2xl p-5 text-white relative overflow-hidden">
-          <div className="absolute right-0 top-0 bottom-0 w-24 flex items-center justify-center text-6xl opacity-10">🔒</div>
+        <div className="bg-green-900 rounded-2xl p-4 sm:p-5 text-white relative overflow-hidden">
+          <div className="absolute right-0 top-0 bottom-0 w-20 flex items-center justify-center text-5xl opacity-10">🔒</div>
           <p className="text-sm text-green-300 mb-1">Vérification Blockchain</p>
           <p className="text-sm font-bold text-white leading-relaxed">
-            Les transactions sont signées cryptographiquement et sécurisées sur 4 nœuds.
+            Transactions signées cryptographiquement sur 4 nœuds.
           </p>
         </div>
       </div>
 
       {/* FILTRES + RECHERCHE */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row items-start md:items-center gap-4">
-          <div className="flex items-center gap-2 flex-wrap">
+        <div className="p-3 sm:p-4 border-b border-gray-100 flex flex-col gap-3">
+          {/* Filtres — scroll horizontal sur mobile */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
             {[
-              { key: 'tout', label: 'Toutes les Transactions' },
+              { key: 'tout', label: 'Toutes' },
               { key: 'revenus', label: 'Revenus' },
               { key: 'depenses', label: 'Dépenses' },
-              { key: 'valeur_elevee', label: 'Valeur Élevée (>500k)' },
+              { key: 'valeur_elevee', label: '>500k' },
             ].map(f => (
               <button
                 key={f.key}
                 onClick={() => { setFiltre(f.key); setPage(1); }}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition ${
+                className={`px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition whitespace-nowrap flex-shrink-0 ${
                   filtre === f.key
                     ? 'bg-green-800 text-white'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -239,22 +291,21 @@ const revenuMensuel = transactions
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-2 ml-auto">
-            <div className="flex items-center gap-2 border border-gray-200 rounded-xl px-3 py-2">
-              <span className="text-gray-400"></span>
-              <input
-                type="text"
-                placeholder="Rechercher..."
-                value={recherche}
-                onChange={e => { setRecherche(e.target.value); setPage(1); }}
-                className="outline-none text-sm text-gray-700 w-40 bg-transparent"
-              />
-            </div>
+          {/* Recherche */}
+          <div className="flex items-center gap-2 border border-gray-200 rounded-xl px-3 py-2">
+            <span className="text-gray-400 text-sm">🔍</span>
+            <input
+              type="text"
+              placeholder="Rechercher une transaction..."
+              value={recherche}
+              onChange={e => { setRecherche(e.target.value); setPage(1); }}
+              className="outline-none text-sm text-gray-700 w-full bg-transparent"
+            />
           </div>
         </div>
 
-        {/* TABLEAU */}
-        <div className="overflow-x-auto">
+        {/* TABLEAU — visible seulement sur md+ */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-100">
@@ -283,12 +334,26 @@ const revenuMensuel = transactions
           </table>
         </div>
 
+        {/* CARTES — visible seulement sur mobile (< md) */}
+        <div className="md:hidden p-3 space-y-3">
+          {affichees.length === 0 ? (
+            <div className="text-center py-10 text-gray-400">
+              <p className="text-3xl mb-2">📋</p>
+              <p className="text-sm">Aucune transaction trouvée</p>
+            </div>
+          ) : (
+            affichees.map((tx, i) => (
+              <TransactionCard key={tx.id} tx={tx} />
+            ))
+          )}
+        </div>
+
         {/* PAGINATION */}
-        <div className="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
-          <p className="text-sm text-gray-500">
-            Affichage de {Math.min(PAR_PAGE, filtrees.length)} entrées sur {filtrees.length}
+        <div className="px-3 sm:px-4 py-3 border-t border-gray-100 flex items-center justify-between gap-2">
+          <p className="text-xs sm:text-sm text-gray-500">
+            {Math.min(PAR_PAGE, filtrees.length)} / {filtrees.length} transactions
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <button
               onClick={() => setPage(p => Math.max(1, p - 1))}
               disabled={page === 1}
@@ -313,18 +378,17 @@ const revenuMensuel = transactions
       </div>
 
       {/* GARANTIE TRANSPARENCE */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 text-center">
-        
-        <h3 className="font-bold text-green-800 text-lg mb-2">Notre Garantie de Transparence Radicale</h3>
-        <p className="text-gray-500 text-sm leading-relaxed max-w-2xl mx-auto mb-4">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 text-center">
+        <h3 className="font-bold text-green-800 text-base sm:text-lg mb-2">Notre Garantie de Transparence Radicale</h3>
+        <p className="text-gray-500 text-xs sm:text-sm leading-relaxed max-w-2xl mx-auto mb-4">
           Chaque transaction est visible par tous les membres. Aucune manipulation cachée n'est possible.
           CoopLedger utilise des ancres cryptographiques pour garantir qu'une fois un enregistrement saisi,
           il ne peut être modifié sans le consensus de la communauté.
         </p>
-        <div className="flex justify-center gap-6 text-xs text-gray-400 font-medium uppercase tracking-wider">
+        <div className="flex justify-center gap-4 sm:gap-6 text-xs text-gray-400 font-medium uppercase tracking-wider flex-wrap">
           <button className="hover:text-green-700 transition">Spécifications Techniques</button>
-          <button className="hover:text-green-700 transition">Gouvernance du Registre</button>
-          <button className="hover:text-green-700 transition">Politique de Sécurité</button>
+          <button className="hover:text-green-700 transition">Gouvernance</button>
+          <button className="hover:text-green-700 transition">Sécurité</button>
         </div>
       </div>
     </div>

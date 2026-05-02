@@ -6,6 +6,7 @@ import Vote from './pages/Vote';
 import Historique from './pages/Historique';
 import NouvelleTransaction from './pages/NouvelleTransaction';
 import Navbar from './components/Navbar';
+import MobileNav from './components/MobileNav';
 
 export default function App() {
   const { user, userData, loading } = useAuth();
@@ -28,7 +29,8 @@ export default function App() {
     <BrowserRouter>
       <div className="min-h-screen bg-gray-50">
         <Navbar userData={userData} />
-        <div className="pt-16">
+        {/* pt-16 = hauteur navbar | pb-20 md:pb-0 = hauteur bottom nav mobile */}
+        <div className="pt-16 pb-20 md:pb-0">
           <Routes>
             {/* ✅ Toujours rediriger vers / au démarrage */}
             <Route path="/" element={<Dashboard userData={userData} />} />
@@ -46,6 +48,8 @@ export default function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
+        {/* Barre de navigation mobile native */}
+        <MobileNav userData={userData} />
       </div>
     </BrowserRouter>
   );
