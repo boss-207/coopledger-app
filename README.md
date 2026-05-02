@@ -1,70 +1,130 @@
-# Getting Started with Create React App
+📋 Description
+CoopLedger est une application web progressive (PWA) qui résout le problème structurel d'opacité financière dans les coopératives agricoles togolaises.
+En mars 2025, plus de 4 000 000 FCFA de cotisations d'agriculteurs du Centre de Transformation Agricole (CTA) de Broukou (Préfecture de Doufelgou, Région de la Kara) ont été détournés. Ce détournement a été possible parce qu'il n'existait aucun registre transparent, aucun audit accessible aux membres et aucun mécanisme de vote sur les dépenses.
+CoopLedger rend ce type de fraude techniquement impossible en enregistrant chaque transaction sur un registre distribué simulant la blockchain Polygon, avec un système de vote automatique par smart contract.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+🎯 Problème résolu
+IndicateurDonnéeCoopératives togolaises sans outil numérique60%+Membres ne faisant pas confiance à leur direction70%Fonds collectifs détournés chaque année15 à 20%Financement supplémentaire pour coopératives transparentes3× plus (IFAD 2022)
 
-## Available Scripts
+✨ Fonctionnalités principales
+🏠 Tableau de bord en temps réel
 
-In the project directory, you can run:
+Solde total de la coopérative calculé automatiquement depuis Firebase
+Graphique Dépenses vs Revenus des 6 derniers mois (données réelles)
+Alertes de votes en cours avec décompte en temps réel
+Activité récente de la coopérative
+Accès personnalisé selon le rôle (Président / Trésorier / Membre)
 
-### `npm start`
+🗳️ Système de vote décentralisé
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Toute dépense > 500 000 FCFA déclenche automatiquement un vote
+Vote OUI / NON depuis n'importe quel appareil
+Barre de progression du quorum en temps réel (seuil : 60%)
+Annulation automatique si le quorum n'est pas atteint avant expiration
+Chaque vote génère un hash cryptographique unique
+Impossible de voter deux fois
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+📋 Registre immuable (Historique)
 
-### `npm test`
+Toutes les transactions tracées avec hash blockchain
+Filtres par type (Revenus / Dépenses / Valeur élevée)
+Recherche par titre ou hash
+Pagination et détails par transaction
+Statuts : Vérifié ✅ / En cours 🔄 / Rejeté ❌
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+➕ Création de transactions (Trésorier / Président)
 
-### `npm run build`
+Formulaire en 3 étapes avec confirmation
+Déclenchement automatique du vote si montant dépasse le seuil
+Reçu blockchain avec hash unique à chaque transaction
+Catégories : Intrants, Matériel, Transport, Infrastructure, Formation
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+🔐 Gestion des rôles
+RôlePermissionsPrésidentTout voir + créer des transactions + voterTrésorierTout voir + créer des transactions + voterMembreConsulter le registre + voter
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+🛠️ Technologies utilisées
+TechnologieUsageReact JS 18Interface utilisateurTailwind CSS 3Design et stylesFirebase AuthenticationConnexion / Inscription sécuriséeFirebase FirestoreBase de données temps réelRechartsGraphiques Dépenses vs RevenusReact Router DOMNavigation entre les pagesPolygon (simulé)Comportement blockchain — hash cryptographique, immuabilitéVercel / NetlifyDéploiement en production
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+🚀 Installation et utilisation
+Prérequis
 
-### `npm run eject`
+Node.js 18+
+npm ou yarn
+Compte Firebase (gratuit)
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+1. Cloner le projet
+bashgit clone https://github.com/TON_USERNAME/coopledger-app.git
+cd coopledger-app
+2. Installer les dépendances
+bashnpm install
+3. Configurer Firebase
+Crée un fichier .env à la racine du projet :
+envREACT_APP_FIREBASE_API_KEY=ta_valeur
+REACT_APP_FIREBASE_AUTH_DOMAIN=ton_projet.firebaseapp.com
+REACT_APP_FIREBASE_PROJECT_ID=ton_projet
+REACT_APP_FIREBASE_STORAGE_BUCKET=ton_projet.appspot.com
+REACT_APP_FIREBASE_MESSAGING_ID=ton_id
+REACT_APP_FIREBASE_APP_ID=ton_app_id
+Dans src/firebase.js, remplace les valeurs par :
+jsconst firebaseConfig = {
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID
+};
+4. Configurer Firebase Console
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Crée un projet sur console.firebase.google.com
+Active Firestore Database en mode test
+Active Authentication → Email/Mot de passe
+Ajoute localhost dans Authentication → Settings → Authorized domains
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+5. Créer les comptes de test
+Dans Firebase Console → Authentication → Add User :
+president@coop.tg   →  mot de passe de votre choix
+tresorier@coop.tg   →  mot de passe de votre choix
+Dans Firestore → collection users → créer un document par utilisateur avec l'UID comme ID :
+json{
+  "nom": "Moussa Traoré",
+  "email": "president@coop.tg",
+  "role": "president",
+  "cooperativeId": "broukou",
+  "statut": "actif"
+}
+6. Lancer en développement
+bashnpm start
+Ouvre http://localhost:3000
+7. Build de production
+bashCI= npm run build
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+📁 Structure du projet
+src/
+├── firebase.js              # Configuration Firebase
+├── App.jsx                  # Routing + authentification
+├── index.js                 # Point d'entrée
+├── pages/
+│   ├── Login.jsx            # Connexion / Inscription
+│   ├── Dashboard.jsx        # Tableau de bord principal
+│   ├── Vote.jsx             # Système de vote
+│   ├── Historique.jsx       # Registre des transactions
+│   └── NouvelleTransaction.jsx  # Créer une transaction
+├── components/
+│   ├── Navbar.jsx           # Barre de navigation
+│   └── ProtectedRoute.jsx   # Protection par rôle
+└── hooks/
+    └── useAuth.js           # Hook d'authentification
 
-## Learn More
+🎬 Scénario de démonstration
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Connexion Trésorier → tresorier@coop.tg
+Créer une transaction → "Achat engrais NPK" · 750 000 FCFA
+Vote déclenché automatiquement ⚡ (> 500 000 FCFA)
+Connexion Membre sur un autre onglet → alerte visible sur le dashboard
+Vote OUI → compteur mis à jour en temps réel
+Historique → transaction visible avec hash blockchain
 
-To learn React, check out the [React documentation](https://reactjs.org/).
 
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+🌍 Cas réels documentés
+StructureProblèmeSourceCTA de Broukou (Kara)4 000 000 FCFA détournés · Mars 2025TogoActualitéFNGPC / NSCT (filière coton)Absence de dividendes · gestion opaque · Avril 2025République Togolaise
